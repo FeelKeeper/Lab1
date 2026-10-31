@@ -7,6 +7,9 @@
 
 ## Запуск (ModelSim)
 vlib work
+
 vlog -sv apb_slave.sv apb_master.sv top.sv
+
 vsim work.top
+
 run -all
