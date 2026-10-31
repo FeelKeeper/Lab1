@@ -12,6 +12,10 @@ module apb_slave
     output logic [31:0] prdata // прочитанные данные
 );
     logic [31:0] register_with_some_name;
+    logic [31:0] reg_num;       // адрес 0x0: номер в списке
+    logic [31:0] reg_date;      // адрес 0x4: дата
+    logic [31:0] reg_surname;   // адрес 0x8: фамилия
+    logic [31:0] reg_name;      // адрес 0xC: имя
     //APB FSM
     enum logic [1:0] {
         APB_SETUP,
@@ -26,6 +30,10 @@ module apb_slave
             pslverr <= 1'b0;
             pready <= 1'b0;
             register_with_some_name <= 32'h0;
+            reg_num <= 32'h0;
+            reg_date <= 32'h0;
+            reg_surname <= 32'h0;
+            reg_name <= 32'h0;
             apb_st <= APB_SETUP;
         end
         else
@@ -36,6 +44,7 @@ module apb_slave
                     // clear the prdata and error
                     prdata <= '0;
                     pready <= 1'b0;
+                    pslverr <= 1'b0;
                     // Move to ENABLE when the psel is asserted
                     if (psel && !penable)
                     begin
@@ -57,14 +66,16 @@ module apb_slave
                         pready <= 1'b1;
                         case (paddr[7:0])
                             8'h0: begin
-										if (pwdata[0] == 1'b0)
-										begin
-											register_with_some_name <=32'hAAAA_AAAA;
-										end
-										else
-										begin
-											register_with_some_name <=32'h5555_5555;
-										end
+                                reg_num <= pwdata;
+								// if (pwdata[0] == 1'b0)
+								// begin
+								// 	register_with_some_name <=32'hAAAA_AAAA;
+								// end
+								// else
+								// begin
+								// 	register_with_some_name <=32'h5555_5555;
+								// end
+                                $display("SLAVE: WRITE addr=%h data=%h", paddr, pwdata);
                                 // запись в регистр со смещением 0
                                 //register_with_some_name <= pwdata;
                                 // и/или обработка записи в регистр для выполнения каких-либо действий (может быть здесь или за пределами FSM APB)
@@ -75,9 +86,18 @@ module apb_slave
                             end
                             8'h4: begin
                                 // запись в регистр со смещением 4
+                                reg_date <= pwdata;
+                                $display("SLAVE: WRITE addr=%h data=%h", paddr, pwdata);
                             end
                             8'h8: begin
                                 // запись в регистр со смещением 8
+                                reg_surname <= pwdata;
+                                $display("SLAVE: WRITE addr=%h data=%h", paddr, pwdata);
+                            end
+                            8'hC: begin
+                                //запись в регистр со смещением 12
+                                reg_name <= pwdata;
+                                $display("SLAVE: WRITE addr=%h data=%h", paddr, pwdata);
                             end
                             default:
                             begin
@@ -95,13 +115,23 @@ module apb_slave
                         case (paddr[7:0])
                             8'h0: begin
                                 // чтение из регистра со смещением 0
-                                prdata[31:0] <= register_with_some_name[31:0];
+                                prdata[31:0] <= reg_num;
+                                $display("SLAVE: READ addr=%h data=%h", paddr, reg_num);
                             end
                             8'h4: begin
-                                // запись из регистра со смещением 4
+                                // чтение из регистра со смещением 4
+                                prdata[31:0] <= reg_date;
+                                $display("SLAVE: READ addr=%h data=%h", paddr, reg_date);
                             end
                             8'h8: begin
-                                // запись из регистра со смещением 8
+                                // чтение из регистра со смещением 8
+                                prdata[31:0] <= reg_surname;
+                                $display("SLAVE: READ addr=%h data=%h", paddr, reg_surname);
+                            end
+                            8'hC: begin
+                                //чтение из регистра со смещением 12
+                                prdata[31:0] <= reg_name;
+                                $display("SLAVE: READ addr=%h data=%h", paddr, reg_name);
                             end
                             default:
                             begin

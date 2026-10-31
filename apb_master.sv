@@ -68,13 +68,26 @@ begin
     wait (presetn == 1'b1);
     repeat (5) @(posedge pclk);
 
-    address = p_device_offset + 0;
-    data_to_device = 32'h12345678;
+    address = p_device_offset + 32'h0;
+    data_to_device = 32'h0000_0004;
     apb_write(address, data_to_device);
     apb_read(address, data_from_device);
     $display("Addr= 0x%h, write data 0x%h, read data 0x%h", address, data_to_device, data_from_device);
 
-    data_to_device = 32'h1;
+    address = p_device_offset + 32'h4;
+    data_to_device = 32'h3110_2026;
+    apb_write(address, data_to_device);
+    apb_read(address, data_from_device);
+    $display("Addr= 0x%h, write data 0x%h, read data 0x%h", address, data_to_device, data_from_device);
+
+    address = p_device_offset + 32'h8;
+    data_to_device = 32'h5A69_6E6F;
+    apb_write(address, data_to_device);
+    apb_read(address, data_from_device);
+    $display("Addr= 0x%h, write data 0x%h, read data 0x%h", address, data_to_device, data_from_device);
+
+    address = p_device_offset + 32'hC;
+    data_to_device = 32'h4576_6765;
     apb_write(address, data_to_device);
     apb_read(address, data_from_device);
     $display("Addr= 0x%h, write data 0x%h, read data 0x%h", address, data_to_device, data_from_device);
