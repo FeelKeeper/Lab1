@@ -18,6 +18,7 @@ module apb_slave
         APB_W_ENABLE,
         APB_R_ENABLE
     } apb_st;
+	 
     always @(posedge pclk)
         if (!presetn)
         begin
@@ -56,8 +57,16 @@ module apb_slave
                         pready <= 1'b1;
                         case (paddr[7:0])
                             8'h0: begin
+										if (pwdata[0] == 1'b0)
+										begin
+											register_with_some_name <=32'hAAAA_AAAA;
+										end
+										else
+										begin
+											register_with_some_name <=32'h5555_5555;
+										end
                                 // запись в регистр со смещением 0
-                                register_with_some_name <= pwdata;
+                                //register_with_some_name <= pwdata;
                                 // и/или обработка записи в регистр для выполнения каких-либо действий (может быть здесь или за пределами FSM APB)
                                 // if (pwdata[.....] == ..... )
                                 // begin
@@ -109,13 +118,6 @@ module apb_slave
             endcase
             // можем выполнить какие-то действия здесь
             //if (penable==1'b0)
-            if (register_with_some_name[0] == 1'b0)
-            begin
-                register_with_some_name <= 32'hAAAA_AAAA;
-            end
-            else
-            begin
-                register_with_some_name <= 32'h5555_5555;
-            end
+            
         end // закончился блок внутри always
 endmodule
